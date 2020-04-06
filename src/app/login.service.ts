@@ -8,6 +8,7 @@ import {BehaviorSubject} from 'rxjs';
 export class LoginService {
 
   private loggedIn = new BehaviorSubject<boolean>(false);
+  loggedInUser;
 
   constructor( private router:Router,private afAuth: AngularFireAuth){
   }  
@@ -21,8 +22,8 @@ export class LoginService {
         return this.afAuth.signInWithEmailAndPassword(username,password)
             .then(authState => {          
                 console.log("Login-then",authState);    
-                this.loggedIn.next(true);
-                
+                this.loggedIn.next(true);                
+                this.loggedInUser=authState.user.uid;              
                 this.router.navigate(['/']);                      
             })
             .catch(
@@ -36,7 +37,8 @@ export class LoginService {
 
   logout(){
     this.loggedIn.next(false);      
-    this.afAuth.signOut();        
+    this.afAuth.signOut();   
+    this.loggedInUser=null;      
     this.router.navigate(['/login']);
   }
 
@@ -45,7 +47,8 @@ export class LoginService {
         .then(
             authState => {
                 console.log("signup-then",authState);  
-                this.loggedIn.next(true);                                  
+                this.loggedIn.next(true); 
+                this.loggedInUser=authState.user.uid;                                                              
                 this.router.navigate(['/']);
             }
         )
@@ -61,7 +64,8 @@ export class LoginService {
   getCurrentUser(){       
     return this.afAuth.authState.subscribe(authState => {
         if(authState){
-            this.loggedIn.next(true);              
+            this.loggedIn.next(true);  
+            this.loggedInUser=authState.uid;             
             this.router.navigate(['/']);    
                             
             console.log("logged in as " + authState.uid);
@@ -71,4 +75,6 @@ export class LoginService {
         }           
       });           
   }  
+
+
 }
